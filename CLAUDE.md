@@ -312,3 +312,94 @@ libraries/
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+How does the Agent tab in the app works?
+I'll explore the Agent tab implementation to understand how it works.
+
+[1 tool called]
+
+## Agent Tab Architecture
+
+### High-Level Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                     AGENT TAB (3-Column Layout)                     │
+├──────────────────┬─────────────────────────┬────────────────────────┤
+│   AgentList      │     AgentChat           │      Threads           │
+│   (Left Panel)   │     (Center)            │      (Right Panel)     │
+│                  │                         │                        │
+│ ☑ LinkedIn       │  User: "Create a post   │  Thread 1              │
+│ ☑ X (Twitter)    │   about my new feature" │  Thread 2              │
+│ ☐ Facebook       │                         │  Thread 3 (current)    │
+│ ☐ Instagram      │  Agent: "I'll create    │                        │
+│                  │   posts for LinkedIn    │                        │
+│  (toggleable)    │   and X..."             │                        │
+└──────────────────┴─────────────────────────┴────────────────────────┘
+```
+
+### Context Flow to AI Agent
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    FRONTEND (CopilotKit)                            │
+│                                                                     │
+│  Selected Integrations ────► PropertiesContext (React Context)      │
+│        │                                                            │
+│        ▼                                                            │
+│  Message + [--integrations--] tag embedded in each user message     │
+│        │                                                            │
+└────────┼────────────────────────────────────────────────────────────┘
+         │
+         ▼  POST /copilot/agent
+┌─────────────────────────────────────────────────────────────────────┐
+│                    BACKEND (Mastra + CopilotKit Runtime)            │
+│                                                                     │
+│  RuntimeContext receives:                                           │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │ integrations: [                                               │  │
+│  │   { id, platform: "linkedin", profilePicture, settings },     │  │
+│  │   { id, platform: "x", profilePicture, settings }             │  │
+│  │ ]                                                             │  │
+│  │ organization: { ... }                                         │  │
+│  │ ui: "true"                                                    │  │
+│  └───────────────────────────────────────────────────────────────┘  │
+│                              │                                      │
+│                              ▼                                      │
+│                    GPT-4.1 "postiz" Agent                           │
+│                              │                                      │
+│         ┌────────────────────┼────────────────────┐                 │
+│         ▼                    ▼                    ▼                 │
+│  integrationSchema    schedulePostTool    generateImage             │
+│  (get platform rules) (create posts)      generateVideo             │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### What Channel Selection Does
+
+```
+BEFORE (no channels selected):
+┌──────────────────────────────────────┐
+│ Agent has NO target platforms        │
+│ Can only answer general questions    │
+└──────────────────────────────────────┘
+
+AFTER (LinkedIn + X selected):
+┌──────────────────────────────────────────────────────────────────┐
+│ Agent KNOWS to:                                                  │
+│  • Query LinkedIn's schema (max 3000 chars, no threads)          │
+│  • Query X's schema (max 280 chars, supports threads)            │
+│  • Schedule posts ONLY to these 2 platforms                      │
+│  • Apply platform-specific rules (hashtags, media limits, etc.)  │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+### Key Takeaways
+
+| Component | Purpose |
+|-----------|---------|
+| **Channel selection** | Filters which integrations the agent can target when scheduling posts |
+| **RuntimeContext** | Server-side context bag that tools read from |
+| **`[--integrations--]` tag** | Embeds selected channels in every message for AI awareness |
+| **integrationSchema tool** | Agent calls this to learn platform-specific limits/rules |
+| **schedulePostTool** | Creates the actual posts to selected channels |

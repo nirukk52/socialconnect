@@ -61,7 +61,7 @@ export function Register() {
       setCode(token);
       setShow(true);
     }
-  }, [provider, code]);
+  }, [fetch, provider, code]);
   if (!code && !provider) {
     return <RegisterAfter token="" provider="LOCAL" />;
   }
