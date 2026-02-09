@@ -230,26 +230,41 @@ export class XProvider extends SocialAbstract implements SocialProvider {
     };
   }
 
+  /**
+   * X Developer Portal does not accept "localhost" in callback URLs.
+   * Use 127.0.0.1 so the URL matches what is allowed in the portal.
+   */
+  private getCallbackBaseUrl(): string {
+    const base =
+      process.env.X_URL || process.env.FRONTEND_URL || 'http://localhost:4200';
+    return base.replace(/localhost/i, '127.0.0.1');
+  }
+
   async generateAuthUrl() {
-    const client = new TwitterApi({
-      appKey: process.env.X_API_KEY!,
-      appSecret: process.env.X_API_SECRET!,
-    });
-    const { url, oauth_token, oauth_token_secret } =
-      await client.generateAuthLink(
-        (process.env.X_URL || process.env.FRONTEND_URL) +
-          `/integrations/social/x`,
-        {
+    const callbackUrl = `${this.getCallbackBaseUrl()}/integrations/social/x`;
+
+    try {
+      const client = new TwitterApi({
+        appKey: process.env.X_API_KEY!,
+        appSecret: process.env.X_API_SECRET!,
+      });
+
+      const { url, oauth_token, oauth_token_secret } =
+        await client.generateAuthLink(callbackUrl, {
           authAccessType: 'write',
           linkMode: 'authenticate',
           forceLogin: false,
-        }
-      );
-    return {
-      url,
-      codeVerifier: oauth_token + ':' + oauth_token_secret,
-      state: oauth_token,
-    };
+        });
+
+      return {
+        url,
+        codeVerifier: oauth_token + ':' + oauth_token_secret,
+        state: oauth_token,
+      };
+    } catch (error) {
+      console.error('[X Provider] Error in generateAuthUrl:', error);
+      throw error;
+    }
   }
 
   async authenticate(params: { code: string; codeVerifier: string }) {

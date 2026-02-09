@@ -232,8 +232,17 @@ export class IntegrationsController {
       );
 
       return { url };
-    } catch (err) {
-      return { err: true };
+    } catch (err: any) {
+      console.error(
+        `[Integrations] Error generating auth URL for ${integration}:`,
+        err
+      );
+      const xErrorCode = err?.errors?.[0]?.code ?? err?.data?.errors?.[0]?.code;
+      const message =
+        integration === 'x' && xErrorCode === 32
+          ? 'Invalid X API credentials. Check X_API_KEY and X_API_SECRET in the X Developer Portal (Keys and tokens).'
+          : undefined;
+      return { err: true, ...(message ? { message } : {}) };
     }
   }
 

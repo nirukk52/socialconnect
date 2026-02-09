@@ -37,6 +37,10 @@ async function start() {
       ],
       origin: [
         process.env.FRONTEND_URL,
+        // X OAuth callback uses 127.0.0.1 (localhost not accepted by X); allow same app on both hosts
+        ...(process.env.FRONTEND_URL?.includes('localhost')
+          ? [process.env.FRONTEND_URL.replace(/localhost/i, '127.0.0.1')]
+          : []),
         'http://localhost:6274',
         ...(process.env.MAIN_URL ? [process.env.MAIN_URL] : []),
       ],
