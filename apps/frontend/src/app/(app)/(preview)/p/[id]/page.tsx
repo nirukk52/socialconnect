@@ -1,7 +1,7 @@
 import { internalFetch } from '@gitroom/helpers/utils/internal.fetch';
 export const dynamic = 'force-dynamic';
 import { Metadata } from 'next';
-import { isGeneralServerSide } from '@gitroom/helpers/utils/is.general.server.side';
+import { getAppNameForContext } from '@gitroom/helpers/utils/get.app.name';
 import Image from 'next/image';
 import Link from 'next/link';
 import { CommentsComponents } from '@gitroom/frontend/components/preview/comments.components';
@@ -22,7 +22,7 @@ const RenderPreviewDate = dynamicLoad(
 
 dayjs.extend(utc);
 export const metadata: Metadata = {
-  title: `${isGeneralServerSide() ? 'Postiz' : 'Gitroom'} Preview`,
+  title: `${getAppNameForContext()} Preview`,
   description: '',
 };
 export default async function Auth({
@@ -58,7 +58,7 @@ export default async function Auth({
                 >
                   <div className="max-w-[55px]">
                     <Image
-                      src={'/postiz.svg'}
+                      src={process.env.NEXT_PUBLIC_APP_LOGO || '/logo.svg'}
                       width={55}
                       height={55}
                       alt="Logo"

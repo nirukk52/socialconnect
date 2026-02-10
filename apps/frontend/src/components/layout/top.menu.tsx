@@ -200,7 +200,9 @@ export const useMenuItem = () => {
           />
         </svg>
       ),
-      path: 'https://affiliate.postiz.com',
+      path:
+        process.env.NEXT_PUBLIC_APP_AFFILIATE_URL ||
+        'https://affiliate.postiz.com',
       role: ['ADMIN', 'SUPERADMIN', 'USER'],
       requireBilling: true,
     },

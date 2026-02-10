@@ -1,7 +1,7 @@
 services:
-  postiz:
-    image: ghcr.io/gitroomhq/postiz-app:latest
-    container_name: postiz
+  socialconnect:
+    image: ghcr.io/gitroomhq/socialconnect-app:latest
+    container_name: socialconnect
     restart: always
     environment:
       # === Required Settings

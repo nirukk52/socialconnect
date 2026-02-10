@@ -21,6 +21,7 @@ import { MastraAgent } from '@ag-ui/mastra';
 import { MastraService } from '@gitroom/nestjs-libraries/chat/mastra.service';
 import { Request, Response } from 'express';
 import { RuntimeContext } from '@mastra/core/di';
+import { getAgentName } from '@gitroom/nestjs-libraries/chat/get.agent.name';
 import { CheckPolicies } from '@gitroom/backend/services/auth/permissions/permissions.ability';
 import { AuthorizationActions, Sections } from '@gitroom/backend/services/auth/permissions/permission.exception.class';
 
@@ -122,7 +123,7 @@ export class CopilotController {
     @Param('thread') threadId: string
   ): Promise<any> {
     const mastra = await this._mastraService.mastra();
-    const memory = await mastra.getAgent('postiz').getMemory();
+    const memory = await mastra.getAgent(getAgentName()).getMemory();
     try {
       return await memory.query({
         resourceId: organization.id,
@@ -138,7 +139,7 @@ export class CopilotController {
   async getList(@GetOrgFromRequest() organization: Organization) {
     const mastra = await this._mastraService.mastra();
     // @ts-ignore
-    const memory = await mastra.getAgent('postiz').getMemory();
+    const memory = await mastra.getAgent(getAgentName()).getMemory();
     const list = await memory.getThreadsByResourceIdPaginated({
       resourceId: organization.id,
       perPage: 100000,

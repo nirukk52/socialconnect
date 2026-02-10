@@ -1,4 +1,5 @@
 import { getT } from '@gitroom/react/translation/get.translation.service.backend';
+import { getAppName } from '@gitroom/helpers/utils/get.app.name';
 
 export const dynamic = 'force-dynamic';
 import { ReactNode } from 'react';
@@ -29,7 +30,7 @@ export default async function AuthLayout({
           Over <span className="text-[42px] text-[#FC69FF]">20,000+</span>{' '}
           Entrepreneurs use
           <br />
-          Postiz To Grow Their Social Presence
+          {getAppName()} To Grow Their Social Presence
         </div>
         <TestimonialComponent />
       </div>

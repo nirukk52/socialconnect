@@ -25,6 +25,16 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         className={clsx(jakartaSans.className, 'dark text-primary !bg-primary')}
       >
         <VariableContextComponent
+          appName={
+            process.env.NEXT_PUBLIC_APP_NAME ||
+            process.env.APP_NAME ||
+            'SocialConnect'
+          }
+          appNameEnterprise={
+            process.env.NEXT_PUBLIC_APP_NAME_ENTERPRISE ||
+            process.env.APP_NAME_ENTERPRISE ||
+            'Gitroom'
+          }
           language="en"
           storageProvider={
             process.env.STORAGE_PROVIDER! as 'local' | 'cloudflare'

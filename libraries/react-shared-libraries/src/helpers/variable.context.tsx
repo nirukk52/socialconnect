@@ -2,6 +2,8 @@
 
 import { createContext, FC, ReactNode, useContext, useEffect } from 'react';
 interface VariableContextInterface {
+  appName: string;
+  appNameEnterprise: string;
   stripeClient: string;
   billingEnabled: boolean;
   isGeneral: boolean;
@@ -27,6 +29,8 @@ interface VariableContextInterface {
   sentryDsn: string;
 }
 const VariableContext = createContext({
+  appName: 'SocialConnect',
+  appNameEnterprise: 'Gitroom',
   stripeClient: '',
   billingEnabled: false,
   isGeneral: true,

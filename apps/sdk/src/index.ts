@@ -12,7 +12,15 @@ function toQueryString(obj: Record<string, any>): string {
   return params.toString();
 }
 
-export default class Postiz {
+/**
+ * SocialConnect SDK client for creating and managing posts via API.
+ * Supports self-hosted instances via the optional path parameter.
+ *
+ * @param _apiKey - API key for authorization.
+ * @param _path - Base URL of the API (e.g. https://api.yourdomain.com). Defaults to the hosted Postiz API.
+ *   Callers must pass the base URL for self-hosted or SocialConnect instances; all requests use this origin.
+ */
+export default class SocialConnect {
   constructor(
     private _apiKey: string,
     private _path = 'https://api.postiz.com'

@@ -5,19 +5,24 @@ import { MCPServer } from '@mastra/mcp';
 import { randomUUID } from 'crypto';
 import { OrganizationService } from '@gitroom/nestjs-libraries/database/prisma/organizations/organization.service';
 import { runWithContext } from './async.storage';
+import { getAgentName } from '@gitroom/nestjs-libraries/chat/get.agent.name';
+import { getAppName } from '@gitroom/helpers/utils/get.app.name';
+
 export const startMcp = async (app: INestApplication) => {
   const mastraService = app.get(MastraService, { strict: false });
   const organizationService = app.get(OrganizationService, { strict: false });
+  const agentName = getAgentName();
+  const appName = getAppName();
 
   const mastra = await mastraService.mastra();
-  const agent = mastra.getAgent('postiz');
+  const agent = mastra.getAgent(agentName);
   const tools = await agent.getTools();
 
   const server = new MCPServer({
-    name: 'Postiz MCP',
+    name: `${appName} MCP`,
     version: '1.0.0',
     tools,
-    agents: { postiz: agent },
+    agents: { [agentName]: agent },
   });
 
   app.use(

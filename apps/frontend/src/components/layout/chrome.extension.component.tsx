@@ -6,7 +6,7 @@ export const ChromeExtensionComponent = () => {
   }
   return (
     <a
-      href="https://chromewebstore.google.com/detail/postiz/cidhffagahknaeodkplfbcpfeielnkjl"
+      href={process.env.NEXT_PUBLIC_APP_EXTENSION_URL || 'https://chromewebstore.google.com/detail/postiz/cidhffagahknaeodkplfbcpfeielnkjl'}
       target="_blank"
       className="hover:text-newTextColor"
     >

@@ -2,11 +2,9 @@ import { ThirdPartyComponent } from '@gitroom/frontend/components/third-parties/
 
 export const dynamic = 'force-dynamic';
 import { Metadata } from 'next';
-import { isGeneralServerSide } from '@gitroom/helpers/utils/is.general.server.side';
+import { getAppNameForContext } from '@gitroom/helpers/utils/get.app.name';
 export const metadata: Metadata = {
-  title: `${
-    isGeneralServerSide() ? 'Postiz Integrations' : 'Gitroom Integrations'
-  }`,
+  title: `${getAppNameForContext()} Integrations`,
   description: '',
 };
 export default async function Index() {

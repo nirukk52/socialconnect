@@ -12,7 +12,7 @@ You can find things like:
 - Integrations / OAuth — connect and manage social accounts through provider-specific OAuth flows
 - Billing & subscriptions — Stripe-powered plans with usage limits and self-service billing management
 - Browser extension — quickly share and schedule content from any webpage
-- SDK (@postiz/node) — programmatic access for external tools to create and manage posts via API
+- SDK (@socialconnect/node) — programmatic access for external tools to create and manage posts via API
 
 Core features:
 - Schedule posts — compose and queue posts for 28+ social channels
@@ -366,7 +366,7 @@ I'll explore the Agent tab implementation to understand how it works.
 │  └───────────────────────────────────────────────────────────────┘  │
 │                              │                                      │
 │                              ▼                                      │
-│                    GPT-4.1 "postiz" Agent                           │
+│                    GPT-4.1 Agent (name from APP_NAME env)            │
 │                              │                                      │
 │         ┌────────────────────┼────────────────────┐                 │
 │         ▼                    ▼                    ▼                 │

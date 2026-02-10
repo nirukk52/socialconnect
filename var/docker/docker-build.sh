@@ -2,6 +2,6 @@
 
 set -o xtrace
 
-docker rmi localhost/postiz || true
-docker build --target dist -t localhost/postiz -f Dockerfile.dev .
-docker build --target devcontainer -t localhost/postiz-devcontainer -f Dockerfile.dev .
+docker rmi localhost/socialconnect || true
+docker build --target dist -t localhost/socialconnect -f Dockerfile.dev .
+docker build --target devcontainer -t localhost/socialconnect-devcontainer -f Dockerfile.dev .

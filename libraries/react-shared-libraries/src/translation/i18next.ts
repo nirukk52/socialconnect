@@ -25,6 +25,14 @@ i18next
       order: ['cookie', 'header'],
     },
     preload: runsOnServerSide ? languages : [],
+    interpolation: {
+      defaultVariables: {
+        appName:
+          process.env.NEXT_PUBLIC_APP_NAME ||
+          process.env.APP_NAME ||
+          'SocialConnect',
+      },
+    },
   });
 
 export default i18next;

@@ -19,6 +19,7 @@ import { headers } from 'next/headers';
 import { headerName } from '@gitroom/react/translation/i18n.config';
 import { HtmlComponent } from '@gitroom/frontend/components/layout/html.component';
 import Script from 'next/script';
+import { getAppDomain, getAppName, getAppNameEnterprise } from '@gitroom/helpers/utils/get.app.name';
 // import dynamicLoad from 'next/dynamic';
 // const SetTimezone = dynamicLoad(
 //   () => import('@gitroom/frontend/components/layout/set.timezone'),
@@ -45,7 +46,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         {!!process.env.DATAFAST_WEBSITE_ID && (
           <Script
             data-website-id={process.env.DATAFAST_WEBSITE_ID}
-            data-domain="postiz.com"
+            data-domain={process.env.NEXT_PUBLIC_APP_DOMAIN || getAppDomain()}
             src="https://datafa.st/js/script.js"
             strategy="afterInteractive"
           />
@@ -55,6 +56,8 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         className={clsx(jakartaSans.className, 'dark text-primary !bg-primary')}
       >
         <VariableContextComponent
+          appName={getAppName()}
+          appNameEnterprise={getAppNameEnterprise()}
           storageProvider={
             process.env.STORAGE_PROVIDER! as 'local' | 'cloudflare'
           }
@@ -94,7 +97,13 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
             <DubAnalytics />
             <FacebookComponent />
             <Plausible
-              domain={!!process.env.IS_GENERAL ? 'postiz.com' : 'gitroom.com'}
+              domain={
+                process.env.NEXT_PUBLIC_APP_DOMAIN ||
+                (!!process.env.IS_GENERAL
+                  ? getAppDomain()
+                  : process.env.NEXT_PUBLIC_APP_DOMAIN_ENTERPRISE ||
+                    'gitroom.com')
+              }
             >
               <PHProvider
                 phkey={process.env.NEXT_PUBLIC_POSTHOG_KEY}

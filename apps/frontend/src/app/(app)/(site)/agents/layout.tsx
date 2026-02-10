@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { Agent } from '@gitroom/frontend/components/agents/agent';
 export const metadata: Metadata = {
-  title: 'Postiz - Agent',
+  title: `${process.env.NEXT_PUBLIC_APP_NAME || process.env.APP_NAME || 'SocialConnect'} - Agent`,
   description: '',
 };
 export default async function Layout({

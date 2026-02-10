@@ -3,6 +3,7 @@ import { ConsoleLogger } from '@mastra/core/logger';
 import { pStore } from '@gitroom/nestjs-libraries/chat/mastra.store';
 import { Injectable } from '@nestjs/common';
 import { LoadToolsService } from '@gitroom/nestjs-libraries/chat/load.tools.service';
+import { getAgentName } from '@gitroom/nestjs-libraries/chat/get.agent.name';
 
 @Injectable()
 export class MastraService {
@@ -14,7 +15,7 @@ export class MastraService {
       new Mastra({
         storage: pStore,
         agents: {
-          postiz: await this._loadToolsService.agent(),
+          [getAgentName()]: await this._loadToolsService.agent(),
         },
         logger: new ConsoleLogger({
           level: 'info',

@@ -9,6 +9,7 @@ import { Button } from '@gitroom/react/form/button';
 import copy from 'copy-to-clipboard';
 import { useToaster } from '@gitroom/react/toaster/toaster';
 import { useT } from '@gitroom/react/translation/get.transation.service.client';
+import { useVariables } from '@gitroom/react/helpers/variable.context';
 
 export const MoltbookProvider: FC<Web3ProviderInterface> = (props) => {
   const { onComplete, nonce } = props;
@@ -22,6 +23,7 @@ export const MoltbookProvider: FC<Web3ProviderInterface> = (props) => {
   const [error, setError] = useState('');
   const toaster = useToaster();
   const t = useT();
+  const { appName } = useVariables();
 
   const register = async () => {
     if (!agentName.trim()) {
@@ -37,7 +39,7 @@ export const MoltbookProvider: FC<Web3ProviderInterface> = (props) => {
         method: 'POST',
         body: JSON.stringify({
           name: agentName.trim(),
-          description: agentDescription.trim() || 'Postiz social media scheduler',
+          description: agentDescription.trim() || `${appName} social media scheduler`,
         }),
       });
 
@@ -105,7 +107,7 @@ export const MoltbookProvider: FC<Web3ProviderInterface> = (props) => {
               name="agentName"
               disableForm={true}
               onChange={(e) => setAgentName(e.target.value)}
-              placeholder="MyPostizAgent"
+              placeholder={`My${appName.replace(/\s+/g, '')}Agent`}
             />
             <Input
               label={t('description_optional', 'Description (optional)')}

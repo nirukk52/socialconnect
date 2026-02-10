@@ -6,6 +6,7 @@ import { pStore } from '@gitroom/nestjs-libraries/chat/mastra.store';
 import { array, object, string } from 'zod';
 import { ModuleRef } from '@nestjs/core';
 import { toolList } from '@gitroom/nestjs-libraries/chat/tools/tool.list';
+import { getAgentName } from '@gitroom/nestjs-libraries/chat/get.agent.name';
 import dayjs from 'dayjs';
 
 export const AgentState = object({
@@ -43,7 +44,7 @@ export class LoadToolsService {
   async agent() {
     const tools = await this.loadTools();
     return new Agent({
-      name: 'postiz',
+      name: getAgentName(),
       description: 'Agent that helps manage and schedule social media posts for users',
       instructions: ({ runtimeContext }) => {
         const ui: string = runtimeContext.get('ui' as never);
