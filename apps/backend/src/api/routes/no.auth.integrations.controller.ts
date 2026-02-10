@@ -150,7 +150,15 @@ export class NoAuthIntegrationsController {
         }
 
         return res(auth);
-      } catch (err) {
+      } catch (err: any) {
+        console.error('[Integration Auth Error]', {
+          integration,
+          errorType: err?.constructor?.name,
+          errorMessage: err?.message,
+          errorStack: err?.stack,
+          fullError: err,
+        });
+        
         if (err instanceof NotEnoughScopes) {
           return res({
             error: err.message,
@@ -164,7 +172,7 @@ export class NoAuthIntegrationsController {
         }
 
         return res({
-          error: 'Authentication failed',
+          error: `Authentication failed: ${err?.message || 'Unknown error'}`,
           accessToken: '',
           id: '',
           name: '',

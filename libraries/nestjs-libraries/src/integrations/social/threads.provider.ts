@@ -14,6 +14,18 @@ import { Plug } from '@gitroom/helpers/decorators/plug.decorator';
 import { Integration } from '@prisma/client';
 import { stripHtmlValidation } from '@gitroom/helpers/utils/strip.html.validation';
 
+/**
+ * Resolves Threads OAuth app credentials. Threads uses the same Meta app as Facebook,
+ * so we fall back to FACEBOOK_APP_ID/SECRET when THREADS_* are not set.
+ */
+function getThreadsAppCredentials(): { clientId: string; clientSecret: string } {
+  const clientId =
+    process.env.THREADS_APP_ID?.trim() || process.env.FACEBOOK_APP_ID?.trim() || '';
+  const clientSecret =
+    process.env.THREADS_APP_SECRET?.trim() || process.env.FACEBOOK_APP_SECRET?.trim() || '';
+  return { clientId, clientSecret };
+}
+
 export class ThreadsProvider extends SocialAbstract implements SocialProvider {
   identifier = 'threads';
   name = 'Threads';
@@ -69,20 +81,35 @@ export class ThreadsProvider extends SocialAbstract implements SocialProvider {
   }
 
   async generateAuthUrl() {
+    const { clientId } = getThreadsAppCredentials();
     const state = makeId(6);
+    
+    // Debug logging
+    console.log('[Threads generateAuthUrl] clientId:', clientId || 'EMPTY!');
+    console.log('[Threads generateAuthUrl] THREADS_APP_ID env:', process.env.THREADS_APP_ID || 'NOT SET');
+    console.log('[Threads generateAuthUrl] FACEBOOK_APP_ID env:', process.env.FACEBOOK_APP_ID || 'NOT SET');
+    
+    if (!clientId) {
+      throw new Error('Threads/Facebook app ID is not configured. Please set THREADS_APP_ID or FACEBOOK_APP_ID in .env');
+    }
+    
+    const redirectUri = process?.env.FRONTEND_URL?.indexOf('https') == -1
+      ? `https://redirectmeto.com/${process?.env.FRONTEND_URL}`
+      : `${process?.env.FRONTEND_URL}`;
+    
+    // Meta requires response_type=code in the authorization URL
+    const url =
+      'https://www.threads.net/oauth/authorize' +
+      `?client_id=${clientId}` +
+      `&redirect_uri=${encodeURIComponent(`${redirectUri}/integrations/social/threads`)}` +
+      `&response_type=code` +
+      `&scope=${encodeURIComponent(this.scopes.join(','))}` +
+      `&state=${state}`;
+    
+    console.log('[Threads generateAuthUrl] Generated URL:', url);
+    
     return {
-      url:
-        'https://www.threads.net/oauth/authorize' +
-        `?client_id=${process.env.THREADS_APP_ID}` +
-        `&redirect_uri=${encodeURIComponent(
-          `${
-            process?.env.FRONTEND_URL?.indexOf('https') == -1
-              ? `https://redirectmeto.com/${process?.env.FRONTEND_URL}`
-              : `${process?.env.FRONTEND_URL}`
-          }/integrations/social/threads`
-        )}` +
-        `&state=${state}` +
-        `&scope=${encodeURIComponent(this.scopes.join(','))}`,
+      url,
       codeVerifier: makeId(10),
       state,
     };
@@ -93,28 +120,54 @@ export class ThreadsProvider extends SocialAbstract implements SocialProvider {
     codeVerifier: string;
     refresh?: string;
   }) {
-    const getAccessToken = await (
-      await this.fetch(
-        'https://graph.threads.net/oauth/access_token' +
-          `?client_id=${process.env.THREADS_APP_ID}` +
-          `&redirect_uri=${encodeURIComponent(
-            `${
-              process?.env.FRONTEND_URL?.indexOf('https') == -1
-                ? `https://redirectmeto.com/${process?.env.FRONTEND_URL}`
-                : `${process?.env.FRONTEND_URL}`
-            }/integrations/social/threads`
-          )}` +
-          `&grant_type=authorization_code` +
-          `&client_secret=${process.env.THREADS_APP_SECRET}` +
-          `&code=${params.code}`
-      )
-    ).json();
+    const { clientId, clientSecret } = getThreadsAppCredentials();
+    
+    // Debug logging to verify credentials are loaded
+    console.log('[Threads Auth Debug]', {
+      hasClientId: !!clientId,
+      hasClientSecret: !!clientSecret,
+      clientIdLength: clientId?.length || 0,
+      threadsAppId: process.env.THREADS_APP_ID?.substring(0, 5) || 'NOT SET',
+      facebookAppId: process.env.FACEBOOK_APP_ID?.substring(0, 5) || 'NOT SET',
+    });
+    
+    if (!clientId || !clientSecret) {
+      throw new Error('Threads/Facebook app credentials are not configured. Please set THREADS_APP_ID/SECRET or FACEBOOK_APP_ID/SECRET in .env');
+    }
+    
+    const redirectUri =
+      process?.env.FRONTEND_URL?.indexOf('https') == -1
+        ? `https://redirectmeto.com/${process?.env.FRONTEND_URL}`
+        : `${process?.env.FRONTEND_URL}`;
+    const fullRedirectUri = `${redirectUri}/integrations/social/threads`;
+
+    // Meta requires POST with form body for code exchange; GET/query can result in "No app ID was sent".
+    const formBody = new URLSearchParams({
+      client_id: clientId,
+      client_secret: clientSecret,
+      grant_type: 'authorization_code',
+      redirect_uri: fullRedirectUri,
+      code: params.code,
+    });
+    
+    console.log('[Threads Auth] POST to oauth/access_token with client_id:', clientId.substring(0, 5) + '...');
+    console.log('[Threads Auth] Form body:', formBody.toString());
+    
+    const firstTokenResponse = await this.fetch('https://graph.threads.net/oauth/access_token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: formBody.toString(),
+    });
+    
+    const getAccessToken = await firstTokenResponse.json();
+    console.log('[Threads Auth] First token response:', JSON.stringify(getAccessToken, null, 2));
 
     const { access_token } = await (
       await this.fetch(
         'https://graph.threads.net/access_token' +
           '?grant_type=th_exchange_token' +
-          `&client_secret=${process.env.THREADS_APP_SECRET}` +
+          `&client_id=${clientId}` +
+          `&client_secret=${clientSecret}` +
           `&access_token=${getAccessToken.access_token}`
       )
     ).json();
