@@ -71,7 +71,9 @@ function LayoutContextInner(params: { children: ReactNode }) {
         window.location.href = isGeneral
           ? '/launches?onboarding=true'
           : '/analytics?onboarding=true';
-        return true;
+        // Return false to prevent the fetch promise from resolving —
+        // stops callers (e.g. register form) from racing with the redirect
+        return false;
       }
 
       if (response?.headers?.get('reload')) {

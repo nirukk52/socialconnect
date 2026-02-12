@@ -31,6 +31,11 @@ async function start() {
         'Content-Type',
         'Authorization',
         'x-copilotkit-runtime-client-gql-version',
+        // In NOT_SECURED mode the frontend sends JWT via custom headers
+        // instead of httpOnly cookies (needed for cross-domain deployments)
+        ...(process.env.NOT_SECURED
+          ? ['auth', 'showorg', 'impersonate']
+          : []),
       ],
       exposedHeaders: [
         'reload',
