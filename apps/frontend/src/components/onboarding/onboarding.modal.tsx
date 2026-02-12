@@ -247,6 +247,7 @@ const OnboardingStep2: FC<{ onBack: () => void; onFinish: () => void }> = ({
   onFinish,
 }) => {
   const t = useT();
+  const { appName } = useVariables();
 
   return (
     <div className="flex flex-col gap-[24px] flex-1">
