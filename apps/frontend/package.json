@@ -10,6 +10,11 @@
     "start": "dotenv -e ../../.env -- next start -p 4200",
     "pm2": "pm2 start pnpm --name frontend -- start"
   },
+  "dependencies": {
+    "next": "14.2.35",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC"
