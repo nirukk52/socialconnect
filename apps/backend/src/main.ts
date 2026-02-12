@@ -1,3 +1,7 @@
+/**
+ * Backend entrypoint — bootstraps NestJS with Sentry, Temporal, Swagger,
+ * cookie parsing, CORS, and configuration validation.
+ */
 import { initializeSentry } from '@gitroom/nestjs-libraries/sentry/initialize.sentry';
 initializeSentry('backend', true);
 
